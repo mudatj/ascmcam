@@ -2,17 +2,16 @@
 import cv2
 import numpy as np
 import dlib
-import time as t
+import time
 from datetime import date
 from datetime import datetime
 import pandas as pd
 import sqlalchemy
 import pymysql
-#create engine to connect to aws instance
-engine = sqlalchemy.create_engine("mysql+pymysql://Manager:detroit123!@ascmconference-mariadb.c8kgwuuup0za.us-east-2.rds.amazonaws.com/ascmdb", pool_pre_ping=True, echo=False)
 
-#tab = sqlalchemy.Table(name='ascmfeed',  mysql_engine='InnoDB', mariadb_engine='InnoDB')
-#tab.create()
+#create engine to connect to aws instance
+engine = sqlalchemy.create_engine("mysql+pymysql://user:password@instanceurl/dbname", pool_pre_ping=True, echo=False)
+
 #set df
 dfcols = ['date', 'time', 'count']
 indexcol = []
@@ -29,39 +28,39 @@ detector = dlib.get_frontal_face_detector()
 
 today = date.today()
  
-# Capture frames continuously
+#capture frames every second
 while True:
-    t.sleep(1)
-    # Capture frame-by-frame
+    tim.sleep(1)
+    #capture each frame
     ret, frame = cap.read()
-    frame = cv2.flip(frame, 30)
+    #capture one frame per second
+    frame = cv2.flip(frame, 1)
  
     # RGB to grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = detector(gray)
  
-    # Iterator to count faces
+    #iterate to count faces
     i = 0
     for face in faces:
  
-        # Get the coordinates of faces
+        #facial recognition of coordinates
         x, y = face.left(), face.top()
         x1, y1 = face.right(), face.bottom()
+        #creates rectangle w/ coordinates
         cv2.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
  
-        # Increment iterator for each face in faces
+        #iterate for each face
         i = i+1
             
-        # Display the box and faces
+        # display the box and faces
         cv2.putText(frame, 'face num'+str(i), (x-10, y-10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         
-                # Display the resulting frame
+                # display the resulting frame if not commented
         #cv2.imshow('frame', frame)
-        
+    #only count data with faces in the frame    
     if i >= 1:
-        
-        #print(face, i)
         index = datetime.now()
         time = datetime.now().strftime('%H:%M:%S')
         indexcol_a = index
@@ -82,17 +81,18 @@ while True:
         df = df.resample('1Min')
         df = df.mean()
      
-        # This command let's us quit with the "q" button on a keyboard.
     else:
         continue
     
     print(df)
+    #replaces all existing table versions in the database table
+    df.to_sql(name=tablename, con=engine, if_exists='replace')
     
-    df.to_sql(name='ascmfeed_v2', con=engine, if_exists='append')
-    
+
+    #this command lets us quit with the "q" button on a keyboard  
     if cv2.waitKey(1) & 0xFF == ord('q'):
             break
  
-# Release the capture and destroy the windows
+#release the capture and destroy the windows
 cap.release()
 cv2.destroyAllWindows()
