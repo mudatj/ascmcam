@@ -1,4 +1,4 @@
-# Import required libraries
+#import required libraries
 import cv2
 import numpy as np
 import dlib
@@ -19,11 +19,11 @@ datecol = []
 timecol = []
 countcol = []
  
-# Connects to your computer's default camera
+#connects to your computer's default camera
 cap = cv2.VideoCapture(0)
  
  
-# Detect the coordinates
+#detect the coordinates
 detector = dlib.get_frontal_face_detector()
 
 today = date.today()
@@ -36,7 +36,7 @@ while True:
     #capture one frame per second
     frame = cv2.flip(frame, 1)
  
-    # RGB to grayscale
+    #rgb to grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = detector(gray)
  
@@ -53,11 +53,11 @@ while True:
         #iterate for each face
         i = i+1
             
-        # display the box and faces
+        #display the box and faces
         cv2.putText(frame, 'face num'+str(i), (x-10, y-10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         
-                # display the resulting frame if not commented
+                #display the resulting frame if not commented
         #cv2.imshow('frame', frame)
     #only count data with faces in the frame    
     if i >= 1:
